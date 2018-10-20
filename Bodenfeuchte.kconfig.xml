@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<KonnektingDevice xmlns="http://konnekting.de/xml/KonnektingDevice/v0">
+    <Device ManufacturerId="57005" DeviceId="1" Revision="0">
+        <ManufacturerName>henfri</ManufacturerName>
+        <DeviceName>Bodenfeuchte</DeviceName>
+        <Parameters>
+            <ParameterGroup Name="Allgemein" Id="0">
+                <Parameter Id="0" IdName="Geraeteanlaufzeit">
+                    <Description>Geräteanlaufzeit [0..255sek]</Description>
+                    <Value Type="uint8" Default="00" Options="" Min="00" Max="FF"/>
+                </Parameter>
+            </ParameterGroup>
+            <ParameterGroup Name="Bodenfeuchte" Id="1">
+                <Parameter Id="1" IdName="cyclic">
+                    <Description>Aktualisierung senden</Description>
+                    <Value Type="uint8" Default="01" Options="00=zyklisch|01=nur bei Änderung"/>
+                </Parameter>
+                <Parameter Id="2" IdName="cycle">
+                    <Description>Zyklus [s]</Description>
+                    <Value Type="uint32" Default="0000001E" Options="" Min="00000000" Max="000FFFFF"/>
+                </Parameter>
+                <Parameter Id="3" IdName="DeltaMoisture">
+                    <Description>Bodenfeuchtigkeitsänderung</Description>
+                    <Value Type="uint8" Default="10" Options="05=0,5%|10=1%|15=1,5%|20=2%|25=2,5%|30=3%|35=3,5%|40=4%"/>
+                </Parameter>
+                <Parameter Id="4" IdName="SendOnChange">
+                    <Description>Wert senden bei der Unterschreitung</Description>
+                    <Value Type="uint8" Default="FF" Options="01=ein|00=aus|FF=nicht verwenden"/>
+                </Parameter>
+                <Parameter Id="5" IdName="LowerAlarm">
+                    <Description>Untere Grenze [hPa]</Description>
+                    <Value Type="int16" Default="0000" Options="" Min="0000" Max="7FFF"/>
+                </Parameter>
+                <Parameter Id="6" IdName="SendOnLowerAlarm">
+                    <Description>Wert senden bei der Unterschreitung</Description>
+                    <Value Type="uint8" Default="FF" Options="01=ein|00=aus|FF=nicht verwenden"/>
+                </Parameter>
+                <Parameter Id="7" IdName="UpperAlarm">
+                    <Description>Obere Grenze [hPa]</Description>
+                    <Value Type="int16" Default="0000" Options="" Min="0000" Max="7FFF"/>
+                </Parameter>
+                <Parameter Id="8" IdName="SendOnUpperAlarm">
+                    <Description>Wert senden bei der Überschreitung</Description>
+                    <Value Type="uint8" Default="FF" Options="01=ein|00=aus|FF=nicht verwenden"/>
+                </Parameter>
+              <Parameter Id="9" IdName="Samples">
+                    <Description>Average over n Samples</Description>
+                    <Value Type="uint16" Default="0001" Options="" Min="0000" Max="0050"/>
+                </Parameter>
+            </ParameterGroup>
+        </Parameters>
+        <CommObjects>
+            <CommObject Id="0" IdName="moisture">
+                <Name>Bodenfeuchte</Name>
+                <Function>Messwert</Function>
+                <DataPointType>9.006</DataPointType>
+                <Flags>52</Flags>
+            </CommObject>
+            <CommObject Id="1" IdName="LowerAlarm">
+                <Name>Bodenfeuchte</Name>
+                <Function>Untere Grenze erreicht</Function>
+                <DataPointType>1.001</DataPointType>
+                <Flags>52</Flags>
+            </CommObject>
+            <CommObject Id="2" IdName="UpperAlarm">
+                <Name>Bodenfeuchte</Name>
+                <Function>Obere Grenze erreicht</Function>
+                <DataPointType>1.001</DataPointType>
+                <Flags>52</Flags>
+            </CommObject>
+            <CommObject Id="3" IdName="Resistance">
+                <Name>Widerstand</Name>
+                <Function>Widerstand</Function>
+                <DataPointType>7.001</DataPointType>
+                <Flags>52</Flags>
+            </CommObject>
+        </CommObjects>
+    </Device>
+</KonnektingDevice>
