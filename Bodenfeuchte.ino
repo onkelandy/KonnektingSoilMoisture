@@ -1,4 +1,4 @@
-//#define KDEBUG // comment this line to disable DEBUG mode
+#define KDEBUG // comment this line to disable DEBUG mode
 #ifdef KDEBUG
 #include <DebugUtil.h>
 
@@ -86,19 +86,18 @@ uint8_t valueMoistMax;
 void setup() {
     // debug related stuff
 #ifdef KDEBUG
-
     // Start debug serial with 115200 bauds
-    DEBUGSERIAL.begin(115200);
+    DEBUGSERIAL.begin(9600);
 
-#ifdef __AVR_ATmega32U4__
-    // wait for serial port to connect. Needed for Leonardo/Micro/ProMicro only
-    while (!DEBUGSERIAL)
-#endif
+  #ifdef __AVR_ATmega32U4__
+      // wait for serial port to connect. Needed for Leonardo/Micro/ProMicro only
+      while (!DEBUGSERIAL)
+  #endif
 
     // make debug serial port known to debug class
     // Means: KONNEKTING will sue the same serial port for console debugging
     Debug.setPrintStream(&DEBUGSERIAL);
-    Debug.println("Start")
+    Debug.println("Start");
 #endif
 
   // initialize the digital pin as an output.
@@ -162,7 +161,7 @@ void loop() {
     r[i]                  = long( float(knownResistor) * ( supplyVoltage - sensorVoltage ) / sensorVoltage + 0.5 );
     samples.add(r[i]);
     //DEBUG.print("R");
-    //DEBUG.println(r[i]);
+    //Debug.println(r[i]);
     //valueOf[i].moisture = min( int( pow( valueOf[i].resistance/31.65 , 1.0/-1.695 ) * 400 + 0.5 ) , 100 );
    // m[i]                = min( int( pow( r[i]/31.65 , 1.0/-1.695 ) * 400 + 0.5 ) , 100 );
    // m[i]                = ((4.093+3.213*r[i]/1000)/(1-0.009733*r[i]/1000-0.01205*10));  //10 is Assumed Soil Temp
@@ -194,7 +193,7 @@ void loop() {
   //DEBUG.print();
   //DEBUG.print("\t");
   #ifdef KDEBUG  
-      Debug.println(moisture);
+     // Debug.println(moisture);
   #endif
   
   if (Konnekting.isReadyForApplication()) {
@@ -231,15 +230,15 @@ void knxEvents(byte index) {
 float average (float * array, int len)  // assuming array is int.
 {
   float sum = 0 ;  // sum will be larger than an item, long for safety.
-  //DEBUG.println("Averaging");
+  //Debug.println("Averaging");
   for (int i = 0 ; i < len ; i++){
     //DEBUG.print(" "); 
     //DEBUG.print(array[i]);
     sum = sum+ array[i] ;
     //DEBUG.print(" Sum: ");
-    //DEBUG.println(sum);
+    //Debug.println(sum);
   }
   //DEBUG.print("Average: ");
-  //DEBUG.println(((float) sum) / len);
+  //Debug.println(((float) sum) / len);
   return  ((float) sum) / len ;  // average will be fractional, so float may be appropriate.
 }
