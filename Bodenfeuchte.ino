@@ -1,5 +1,25 @@
-#include <KonnektingDevice.h>
+//#define KDEBUG // comment this line to disable DEBUG mode
+#ifdef KDEBUG
+#include <DebugUtil.h>
 
+
+// Get correct serial port for debugging
+#ifdef __AVR_ATmega32U4__
+// Leonardo/Micro/ProMicro use the USB serial port
+#define DEBUGSERIAL Serial
+#elif ESP8266
+// ESP8266 use the 2nd serial port with TX only
+#define DEBUGSERIAL Serial1
+#else
+// All other, (ATmega328P f.i.) use software serial
+#include <SoftwareSerial.h>
+SoftwareSerial softserial(11, 10); // RX, TX
+#define DEBUGSERIAL softserial
+#endif
+// end of debugging defs
+#endif
+
+#include <KonnektingDevice.h>
 #include <RunningMedian.h>
 // Arduino pro Mini 3.3V 8MHZ
 // "Vinduino" portable soil moisture sensor code V3.00
@@ -11,7 +31,9 @@
 #include <math.h>
 #include "kdevice_Bodenfeuchte.h"
 
-
+// ################################################
+// ### IO Configuration
+// ################################################
 #define NUM_READS 20    // Number of sensor reads for filtering
 const long FirstKnown = 2998;  // Constant value of known resistor in Ohms
 const long SecondKnown = 3000;  // Constant value of known resistor in Ohms
@@ -33,14 +55,7 @@ const long SecondKnown = 3000;  // Constant value of known resistor in Ohms
 #endif
 
 
-// comment following line to disable DEBUG mode
-#define DEBUG debugSerial
 
-// no need to comment, you can leave it as it is as long you do not change the "#define DEBUG debugSerial" line
-#ifdef DEBUG
-#include <SoftwareSerial.h>
-SoftwareSerial debugSerial(10, 11); // RX, TX
-#endif
 
 
 RunningMedian samples = RunningMedian(NUM_READS*2);
@@ -69,8 +84,22 @@ uint8_t valueMoistMin;
 uint8_t valueMoistMax;
 
 void setup() {
-  // initialize serial communications at 9600 bps:
-  DEBUG.begin(9600); 
+    // debug related stuff
+#ifdef KDEBUG
+
+    // Start debug serial with 115200 bauds
+    DEBUGSERIAL.begin(115200);
+
+#ifdef __AVR_ATmega32U4__
+    // wait for serial port to connect. Needed for Leonardo/Micro/ProMicro only
+    while (!DEBUGSERIAL)
+#endif
+
+    // make debug serial port known to debug class
+    // Means: KONNEKTING will sue the same serial port for console debugging
+    Debug.setPrintStream(&DEBUGSERIAL);
+    Debug.println("Start")
+#endif
 
   // initialize the digital pin as an output.
   // Pin SENSOR_PIN_1 is sense resistor voltage supply 1
@@ -164,7 +193,9 @@ void loop() {
   //DEBUG.print("\t");
   //DEBUG.print();
   //DEBUG.print("\t");
-  DEBUG.println(moisture);
+  #ifdef KDEBUG  
+      Debug.println(moisture);
+  #endif
   
   if (Konnekting.isReadyForApplication()) {
     Knx.write(COMOBJ_moisture, moisture);
