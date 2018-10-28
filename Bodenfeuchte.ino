@@ -37,8 +37,8 @@ SoftwareSerial softserial(11, 10); // RX, TX
 #define NUM_READS 20    // Number of sensor reads for filtering
 const long FirstKnown = 2998;  // Constant value of known resistor in Ohms
 const long SecondKnown = 3000;  // Constant value of known resistor in Ohms
-#define PROG_LED_PIN 13
-#define PROG_BUTTON_PIN 8
+#define PROG_LED_PIN 8
+#define PROG_BUTTON_PIN 3
 #define SENSOR_PIN_1 6
 #define SENSOR_PIN_2 7
 
@@ -122,6 +122,13 @@ void setup() {
   }
 
 
+void print_str(char msg[15],float val){
+            char ch[10];
+            dtostrf(val,6,2,ch);    
+            Debug.print(msg);
+            Debug.print(":");
+            Debug.println(ch);
+}
 
 
 void limitReached(float comVal, float comValMin, float comValMax, int minObj, int maxObj, int minVal, int maxVal) {
@@ -137,63 +144,54 @@ void limitReached(float comVal, float comValMin, float comValMax, int minObj, in
     }
 };
 
+void konnekting_delay(unsigned long t){
+  unsigned long start =0;
+  start = millis();
+  while(millis() < start + t){
+        Knx.task();
+    }
+}
+
 void loop() {
-  Knx.task();
+  
   // read sensor, filter, and calculate resistance value
   // Noise filter: median filter
   samples.clear();
   for (i=0; i<NUM_READS*2; i++) {
-
-    setupCurrentPath();      // Prepare the digital and analog pin values
-
-    // Read 1 pair of voltage values
-    digitalWrite(activeDigitalPin, HIGH);                 // set the voltage supply on
-    delay(10);
-    supplyVoltage = analogRead(supplyVoltageAnalogPin);   // read the supply voltage
-    sensorVoltage = analogRead(sensorVoltageAnalogPin);   // read the sensor voltage
-    digitalWrite(activeDigitalPin, LOW);                  // set the voltage supply off  
-    delay(100); 
-
-    // Calculate resistance and moisture percentage without overshooting 100
-    // the 0.5 add-term is used to round to the nearest integer
-    // Tip: no need to transform 0-1023 voltage value to 0-5 range, due to following fraction
-    //valueOf[i].resistance = long( float(knownResistor) * ( supplyVoltage - sensorVoltage ) / sensorVoltage + 0.5 );
-    r[i]                  = long( float(knownResistor) * ( supplyVoltage - sensorVoltage ) / sensorVoltage + 0.5 );
-    samples.add(r[i]);
-    //DEBUG.print("R");
-    //Debug.println(r[i]);
-    //valueOf[i].moisture = min( int( pow( valueOf[i].resistance/31.65 , 1.0/-1.695 ) * 400 + 0.5 ) , 100 );
-   // m[i]                = min( int( pow( r[i]/31.65 , 1.0/-1.695 ) * 400 + 0.5 ) , 100 );
-   // m[i]                = ((4.093+3.213*r[i]/1000)/(1-0.009733*r[i]/1000-0.01205*10));  //10 is Assumed Soil Temp
-//  valueOf[i].moisture = min( int( pow( valueOf[i].resistance/331.55 , 1.0/-1.695 ) * 100 + 0.5 ) , 100 );
-
+          Knx.task();
+          setupCurrentPath();      // Prepare the digital and analog pin values
+      
+          // Read 1 pair of voltage values
+          digitalWrite(activeDigitalPin, HIGH);                 // set the voltage supply on
+          konnekting_delay(10);
+          supplyVoltage = analogRead(supplyVoltageAnalogPin);   // read the supply voltage
+          sensorVoltage = analogRead(sensorVoltageAnalogPin);   // read the sensor voltage
+          digitalWrite(activeDigitalPin, LOW);                  // set the voltage supply off  
+          konnekting_delay(100); 
+          // Calculate resistance and moisture percentage without overshooting 100
+          // the 0.5 add-term is used to round to the nearest integer
+          // Tip: no need to transform 0-1023 voltage value to 0-5 range, due to following fraction
+          //valueOf[i].resistance = long( float(knownResistor) * ( supplyVoltage - sensorVoltage ) / sensorVoltage + 0.5 );
+          r[i]                  = long( float(knownResistor) * ( supplyVoltage - sensorVoltage ) / sensorVoltage + 0.5 );
+          samples.add(r[i]);
+          //#ifdef KDEBUG
+          //  Debug.println(F("knownResistor: %d"), knownResistor);
+          //  Debug.println(F("sensorVoltage: %d"), sensorVoltage);
+          //  Debug.println(F("supplyVoltage: %d"), supplyVoltage);     
+          //  print_str("R", r[i]);   
+          //#endif  
   }
 
   // end of multiple read loop
 
   // Sort the moisture-resistance vector according to moisture
-  //sortMoistures();
-
-  // calculate average
-  //avr=average (r, NUM_READS*2);
   avr=samples.getAverage(5);
   moisture=((4.093+3.213*avr/1000)/(1-0.009733*avr/1000-0.01205*10));
-  
-  // Print out values
-  //DEBUG.print(sensorVoltage);
-  //DEBUG.print("\t");
-  //DEBUG.print(supplyVoltage);
-  //DEBUG.print("\t");
-  //DEBUG.print(moisture);
-  //DEBUG.print("\t");
-  //DEBUG.print(avr);
-  //DEBUG.print("\t");
-  //DEBUG.print(samples.getAverage());
-  //DEBUG.print("\t");
-  //DEBUG.print();
-  //DEBUG.print("\t");
-  #ifdef KDEBUG  
-     // Debug.println(moisture);
+  #ifdef KDEBUG    
+    // Print out values
+    print_str("avr",           avr);
+    print_str("samples.getAverage()",samples.getAverage());
+    print_str("Moisture", moisture);
   #endif
   
   if (Konnekting.isReadyForApplication()) {
@@ -202,7 +200,7 @@ void loop() {
     limitReached(moisture, limitMoistMin, limitMoistMax, COMOBJ_LowerAlarm, COMOBJ_UpperAlarm, valueMoistMin, valueMoistMax);  //hardcoded to send a 1 if exceeded
   }
   
-  delay(5000);
+  konnekting_delay(5000);
      
 
 }
