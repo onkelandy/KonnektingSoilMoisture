@@ -5,55 +5,68 @@
         <DeviceName>Bodenfeuchte</DeviceName>
         <Parameters>
             <ParameterGroup Name="Allgemein" Id="0">
-                <Parameter Id="0" IdName="Geraeteanlaufzeit">
+                <Parameter Id="0" IdName="startup_delay">
                     <Description>Geräteanlaufzeit [0..255sek]</Description>
-                    <Value Type="uint8" Default="00" Options="" Min="00" Max="FF"/>
+                    <Value Type="uint8" Default="05" Options="" Min="00" Max="FF"/>
+                </Parameter>
+				        <Parameter Id="1" IdName="sensor_delay">
+                    <Description>Pause zwischen Messungen [0..255sek]</Description>
+                    <Value Type="uint8" Default="05" Options="" Min="00" Max="FF"/>
+                </Parameter>
+				        <Parameter Id="2" IdName="Samples">
+                    <Description>Anzahl Samples für Median</Description>
+                    <Value Type="uint16" Default="000A" Options="" Min="0000" Max="0050"/>
                 </Parameter>
             </ParameterGroup>
             <ParameterGroup Name="Bodenfeuchte" Id="1">
-                <Parameter Id="1" IdName="cyclic">
-                    <Description>Aktualisierung senden</Description>
-                    <Value Type="uint8" Default="01" Options="00=zyklisch|01=nur bei Änderung"/>
+                <Parameter Id="3" IdName="cyclic">
+                    <Description>Wert zyklisch senden</Description>
+                    <Value Type="uint8" Default="00" Options="00=nur bei Änderung|01=zyklisch|"/>
                 </Parameter>
-                <Parameter Id="2" IdName="cycle">
+                <Parameter Id="4" IdName="cycle">
                     <Description>Zyklus [s]</Description>
                     <Value Type="uint32" Default="0000001E" Options="" Min="00000000" Max="000FFFFF"/>
                 </Parameter>
-                <Parameter Id="3" IdName="DeltaMoisture">
-                    <Description>Bodenfeuchtigkeitsänderung</Description>
-                    <Value Type="uint8" Default="10" Options="05=0,5%|10=1%|15=1,5%|20=2%|25=2,5%|30=3%|35=3,5%|40=4%"/>
+				        <Parameter Id="5" IdName="SendOnChange">
+                    <Description>Wert senden bei Änderung</Description>
+                    <Value Type="uint8" Default="01" Options="01=ein|00=aus|FF=nicht verwenden"/>
                 </Parameter>
-                <Parameter Id="4" IdName="SendOnChange">
+                <Parameter Id="6" IdName="DeltaMoisture">
+                    <Description>Mindeständerung für Wertsenden</Description>
+                    <Value Type="uint8" Default="10" Options="05=0,5%|0A=1%|0F=1,5%|14=2%|19=2,5%|1E=3%|23=3,5%|28=4%|32=5%"/>
+                </Parameter>
+                <Parameter Id="7" IdName="LowerAlarm">
+                    <Description>Untere Grenze [%]</Description>
+                    <Value Type="uint8" Default="28" Options="" Min="00" Max="64"/>
+                </Parameter>
+                <Parameter Id="8" IdName="SendOnLowerAlarm">
                     <Description>Wert senden bei der Unterschreitung</Description>
-                    <Value Type="uint8" Default="FF" Options="01=ein|00=aus|FF=nicht verwenden"/>
+                    <Value Type="uint8" Default="01" Options="01=ein|00=aus|FF=nicht verwenden"/>
                 </Parameter>
-                <Parameter Id="5" IdName="LowerAlarm">
-                    <Description>Untere Grenze [hPa]</Description>
-                    <Value Type="int16" Default="0000" Options="" Min="0000" Max="7FFF"/>
+				        <Parameter Id="9" IdName="RepeatLowerAlarm">
+                    <Description>Wiederholtes Senden bei der Unterschreitung</Description>
+                    <Value Type="uint8" Default="00" Options="00=nur einmalig senden|01=wiederholt senden"/>
                 </Parameter>
-                <Parameter Id="6" IdName="SendOnLowerAlarm">
-                    <Description>Wert senden bei der Unterschreitung</Description>
-                    <Value Type="uint8" Default="FF" Options="01=ein|00=aus|FF=nicht verwenden"/>
+                <Parameter Id="10" IdName="UpperAlarm">
+                    <Description>Obere Grenze [%]</Description>
+                    <Value Type="uint8" Default="3C" Options="" Min="00" Max="64"/>
                 </Parameter>
-                <Parameter Id="7" IdName="UpperAlarm">
-                    <Description>Obere Grenze [hPa]</Description>
-                    <Value Type="int16" Default="0000" Options="" Min="0000" Max="7FFF"/>
-                </Parameter>
-                <Parameter Id="8" IdName="SendOnUpperAlarm">
+                <Parameter Id="11" IdName="SendOnUpperAlarm">
                     <Description>Wert senden bei der Überschreitung</Description>
-                    <Value Type="uint8" Default="FF" Options="01=ein|00=aus|FF=nicht verwenden"/>
+                    <Value Type="uint8" Default="00" Options="01=ein|00=aus|FF=nicht verwenden"/>
                 </Parameter>
-              <Parameter Id="9" IdName="Samples">
-                    <Description>Average over n Samples</Description>
-                    <Value Type="uint16" Default="0001" Options="" Min="0000" Max="0050"/>
+				        <Parameter Id="12" IdName="RepeatUpperAlarm">
+                    <Description>Wiederholtes Senden bei der Überschreitung</Description>
+                    <Value Type="uint8" Default="00" Options="00=nur einmalig senden|01=wiederholt senden"/>
                 </Parameter>
+
             </ParameterGroup>
         </Parameters>
         <CommObjects>
             <CommObject Id="0" IdName="moisture">
                 <Name>Bodenfeuchte</Name>
                 <Function>Messwert</Function>
-                <DataPointType>9.006</DataPointType>
+                <DataPointType>9.007</DataPointType>
                 <Flags>52</Flags>
             </CommObject>
             <CommObject Id="1" IdName="LowerAlarm">
@@ -74,6 +87,44 @@
                 <DataPointType>7.001</DataPointType>
                 <Flags>52</Flags>
             </CommObject>
+			      <CommObject Id="4" IdName="Tension">
+                <Name>Wasserspannung</Name>
+                <Function>Wasserspannung</Function>
+                <DataPointType>7.001</DataPointType>
+                <Flags>52</Flags>
+            </CommObject>
+			      <CommObject Id="5" IdName="Change">
+                <Name>Wertänderung</Name>
+                <Function>Wertänderung</Function>
+                <DataPointType>1.001</DataPointType>
+                <Flags>52</Flags>
+            </CommObject>
         </CommObjects>
     </Device>
+    <Configuration ManufacturerId="57005" DeviceId="1" Revision="0">
+        <IndividualAddress Address="1.1."/>
+        <CommObjectConfigurations>
+            <CommObjectConfiguration Id="0" active="true"/>
+            <CommObjectConfiguration Id="1" active="true"/>
+            <CommObjectConfiguration Id="2" active="true"/>
+            <CommObjectConfiguration Id="3" active="true"/>
+			      <CommObjectConfiguration Id="4" active="true"/>
+			      <CommObjectConfiguration Id="5" active="true"/>
+        </CommObjectConfigurations>
+        <ParameterConfigurations>
+            <ParameterConfiguration Id="0" Value="05"/>
+            <ParameterConfiguration Id="1" Value="05"/>
+            <ParameterConfiguration Id="2" Value="000A"/>
+            <ParameterConfiguration Id="3" Value="00"/>
+            <ParameterConfiguration Id="4" Value="0000001E"/>
+            <ParameterConfiguration Id="5" Value="01"/>
+            <ParameterConfiguration Id="6" Value="0A"/>
+            <ParameterConfiguration Id="7" Value="28"/>
+            <ParameterConfiguration Id="8" Value="01"/>
+            <ParameterConfiguration Id="9" Value="00"/>
+			      <ParameterConfiguration Id="10" Value="3C"/>
+			      <ParameterConfiguration Id="11" Value="00"/>
+			      <ParameterConfiguration Id="12" Value="00"/>
+        </ParameterConfigurations>
+    </Configuration>
 </KonnektingDevice>
