@@ -202,7 +202,7 @@ void loop() {
               supplyVoltage = analogRead(supplyVoltageAnalogPin);   // read the supply voltage
               sensorVoltage = analogRead(sensorVoltageAnalogPin);   // read the sensor voltage
               // supplyVoltage = 750; // for testing purposes only
-              sensorVoltage = random(520,540); // for testing purposes only
+              // sensorVoltage = random(520,540); // for testing purposes only
               #ifdef KDEBUG
                   //Debug.println(F("supplyVoltage: %d"), supplyVoltage);
                   //Debug.println(F("sensorVoltage: %d"), sensorVoltage);
