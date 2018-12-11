@@ -65,7 +65,7 @@ uint16_t supplyVoltage;                // Measured supply voltage
 uint16_t sensorVoltage;                // Measured sensor voltage
 
 uint16_t delay_sensor = 5000; // standard delay for cycle, changed later
-uint8_t delay_on = 20;
+uint8_t delay_on = 10;
 uint8_t delay_off = 100;
 uint32_t currentTime = 0;
 uint32_t initTime = 0;
@@ -192,31 +192,24 @@ void loop() {
             if (currentTime - delayTime >= delay_off && wrote == 1) {
               digitalWrite(activeDigitalPin, HIGH);
               #ifdef KDEBUG
-                  // Debug.println(F("currentTime: %ld. delayTime: %ld. Pin %d is high"), currentTime, delayTime, activeDigitalPin);
+                  Debug.println(F("currentTime: %ld. delayTime: %ld. Pin %d is high"), currentTime, delayTime, activeDigitalPin);
               #endif
               wrote += 1;
               delayTime = millis();
             }
 
-            if (currentTime - delayTime >= delay_on / 2 && wrote == 2) {
+            if (currentTime - delayTime >= delay_on && wrote == 2) {
               supplyVoltage = analogRead(supplyVoltageAnalogPin);   // read the supply voltage
               sensorVoltage = analogRead(sensorVoltageAnalogPin);   // read the sensor voltage
               // supplyVoltage = 750; // for testing purposes only
-              // sensorVoltage = random(520,540); // for testing purposes only
-              #ifdef KDEBUG
-                  //Debug.println(F("supplyVoltage: %d"), supplyVoltage);
-                  //Debug.println(F("sensorVoltage: %d"), sensorVoltage);
-              #endif
+              //sensorVoltage = random(520,540); // for testing purposes only
               calculate(supplyVoltage, sensorVoltage);
-              wrote += 1;
-            }
-            if (currentTime - delayTime >= delay_on && wrote == 3) {
-              runthroughs += 1;
               digitalWrite(activeDigitalPin, LOW);
               #ifdef KDEBUG
-                  // Debug.println(F("currentTime: %ld. delayTime: %ld. Pin %d is low"), currentTime, delayTime, activeDigitalPin);
+                  Debug.println(F("currentTime: %ld. delayTime: %ld. Pin %d is low"), currentTime, delayTime, activeDigitalPin);
               #endif
               setupCurrentPath();
+              runthroughs += 1;
               wrote = 0;
             }
         }
@@ -224,11 +217,14 @@ void loop() {
             #ifdef KDEBUG
                 //Debug.println(F("currentTime: %ld"), currentTime);
                 //Debug.println(F("cycleTime: %ld"), cycleTime);
-                Debug.println(F("moisture after median: %d.%d"), int(moisture * 10.0)/10, int(moisture * 10.0)%10);
+                Debug.println(F("moisture before median: %d.%d"), int(moisture * 10.0)/10, int(moisture * 10.0)%10);
             #endif
             resistance = resistance_samples.getMedian();
             moisture = moisture_samples.getMedian();
             tension = abs(tension_samples.getMedian());
+            #ifdef KDEBUG
+                Debug.println(F("moisture after median: %d.%d"), int(moisture * 10.0)/10, int(moisture * 10.0)%10);
+            #endif
             limitReached(moisture, prev_moisture, limitMoistMin, limitMoistMax, COMOBJ_LowerAlarm, COMOBJ_UpperAlarm, sendMoistMin, sendMoistMax);
             runthroughs = -2;
             wrote = 0;
@@ -274,10 +270,12 @@ void calculate(int supplyVoltage, int sensorVoltage) {
     moisture_samples.add(temp_moisture);
     tension_samples.add(temp_tension);
     #ifdef KDEBUG
-        Debug.println(F("resistance: %d.%d"), int(temp_resistance * 10.0)/10, int(temp_resistance * 10.0)%10);
-        Debug.println(F("moisture: %d.%d"), int(temp_moisture * 10.0)/10, int(temp_moisture * 10.0)%10);
+        Debug.println(F("supplyVoltage: %d"), supplyVoltage);
+        Debug.println(F("sensorVoltage: %d"), sensorVoltage);
+        //Debug.println(F("resistance: %d.%d"), int(temp_resistance * 10.0)/10, int(temp_resistance * 10.0)%10);
+        Debug.println(F("temp moisture: %d.%d"), int(temp_moisture * 10.0)/10, int(temp_moisture * 10.0)%10);
         //Debug.println(F("moisture median: %d.%d"), int(moisture_samples.getMedian() * 10.0)/10, int(moisture_samples.getMedian() * 10.0)%10);
-        Debug.println(F("tension: %d.%d"), int(temp_tension * 10.0)/10, int(temp_tension * 10.0)%10);
+        //Debug.println(F("tension: %d.%d"), int(temp_tension * 10.0)/10, int(temp_tension * 10.0)%10);
         //Debug.println(F("Sample count: %d"), moisture_samples.getCount());
     #endif
 }
